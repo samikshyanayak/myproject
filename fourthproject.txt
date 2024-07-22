@@ -1,0 +1,343 @@
+import React, { useState } from 'react';
+import { View, Text, TextInput, Button, StyleSheet, Image, ScrollView, TouchableOpacity } from 'react-native';
+
+// Sample product data
+const productData = [
+  {
+    id: 1,
+    title: "paneer",
+    description: "A vertical shot of traditional Indian paneer butter masala or cheese cottage curry on a black surface",
+    price: 49.99,
+    rating: 4.5,
+    category: "food",
+    image: "paneer.jpg",
+  },
+  {
+    id: 2,
+    title: "omelet egg",
+    description: "Protein rich, fried eggs omelet on the table",
+    price: 129.99,
+    rating: 4.8,
+    category: "food",
+    image: "egg.jpg",
+  },
+  {
+    id: 3,
+    title: "kurkure",
+    description: "Snacks for evening, corn chips of triangular shape levitate on a white background",
+    price: 34.99,
+    rating: 4.6,
+    category: "food",
+    image: "kurkure.jpg",
+  },
+  {
+    id: 4,
+    title: "chocolates",
+    description: "Less in calories, no sugar",
+    price: 199.99,
+    rating: 4.9,
+    category: "food",
+    image: "chocolate.jpg",
+  },
+];
+
+// StartPage Component
+const StartPage = ({ onStart }) => (
+  <View style={styles.container}>
+    <Text style={styles.title}>Welcome to Food Stall!</Text>
+    <Button title="Getting Started" color="#4CAF50" onPress={onStart} />
+  </View>
+);
+
+// Signup Component
+const Signup = ({ setUsername, setPassword, setEmail, onSignup }) => (
+  <View style={styles.container}>
+    <Text style={styles.title}>Sign Up</Text>
+    <TextInput
+      style={styles.input}
+      placeholder="Username"
+      onChangeText={setUsername}
+    />
+    <TextInput
+      style={styles.input}
+      placeholder="Password"
+      secureTextEntry
+      onChangeText={setPassword}
+    />
+    <TextInput
+      style={styles.input}
+      placeholder="Email"
+      onChangeText={setEmail}
+    />
+    <Button title="Sign Up" color="#4CAF50" onPress={onSignup} />
+  </View>
+);
+
+// Login Component
+const Login = ({ setUsername, setPassword, onLogin }) => (
+  <View style={styles.container}>
+    <Text style={styles.title}>Login</Text>
+    <TextInput
+      style={styles.input}
+      placeholder="Username"
+      onChangeText={setUsername}
+    />
+    <TextInput
+      style={styles.input}
+      placeholder="Password"
+      secureTextEntry
+      onChangeText={setPassword}
+    />
+    <Button title="Login" color="#4CAF50" onPress={onLogin} />
+  </View>
+);
+
+// WelcomePage Component
+const WelcomePage = ({ username, onLogout, onViewProducts, onViewFavorites }) => (
+  <View style={styles.container}>
+    <Text style={styles.welcomeText}>Welcome, {username}!</Text>
+    <View style={styles.buttonContainer}>
+      <Button title="View Products" color="#4CAF50" onPress={onViewProducts} />
+      <Button title="View Favorites" color="#4CAF50" onPress={onViewFavorites} />
+      <Button title="Log Out" color="#4CAF50" onPress={onLogout} />
+    </View>
+  </View>
+);
+
+// ProductCard Component
+const ProductCard = ({ product, isFavorite, onToggleFavorite }) => (
+  <View style={styles.card}>
+    <Image source={{ uri: product.image }} style={styles.image} />
+    <Text style={styles.cardTitle}>{product.title}</Text>
+    <Text style={styles.cardDescription}>{product.description}</Text>
+    <Text style={styles.cardPrice}>${product.price.toFixed(2)}</Text>
+    <Text style={styles.cardRating}>Rating: {product.rating} ★</Text>
+    <TouchableOpacity
+      style={styles.favoriteButton}
+      onPress={() => onToggleFavorite(product)}
+    >
+      <Text style={styles.favoriteButtonText}>
+        {isFavorite ? 'Remove from Favorites' : 'Add to Favorites'}
+      </Text>
+    </TouchableOpacity>
+  </View>
+);
+
+// ProductPage Component
+const ProductPage = ({ username, onLogout, favorites, onToggleFavorite }) => (
+  <View style={styles.container}>
+    <Text style={styles.welcomeText}>Products</Text>
+    <Text style={styles.usernameText}>User: {username}</Text>
+    <ScrollView contentContainerStyle={styles.scrollContainer}>
+      {productData.map((product) => (
+        <ProductCard
+          key={product.id}
+          product={product}
+          isFavorite={favorites.some(fav => fav.id === product.id)}
+          onToggleFavorite={onToggleFavorite}
+        />
+      ))}
+    </ScrollView>
+    <Button title="Log Out" color="#4CAF50" onPress={onLogout} />
+  </View>
+);
+
+// FavoritesPage Component
+const FavoritesPage = ({ username, onLogout, favorites, onToggleFavorite }) => (
+  <View style={styles.container}>
+    <Text style={styles.welcomeText}>Favorites</Text>
+    <Text style={styles.usernameText}>User: {username}</Text>
+    <ScrollView contentContainerStyle={styles.scrollContainer}>
+      {favorites.length > 0 ? (
+        favorites.map((product) => (
+          <ProductCard
+            key={product.id}
+            product={product}
+            isFavorite
+            onToggleFavorite={onToggleFavorite}
+          />
+        ))
+      ) : (
+        <Text style={styles.noFavoritesText}>No favorite products added.</Text>
+      )}
+    </ScrollView>
+    <Button title="Log Out" color="#4CAF50" onPress={onLogout} />
+  </View>
+);
+
+// Main App Component
+const App = () => {
+  const [page, setPage] = useState('startPage');
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState('');
+  const [favorites, setFavorites] = useState([]);
+
+  const handleStart = () => setPage('signupPage');
+
+  const handleSignup = () => setPage('loginPage');
+
+  const handleLogin = () => setPage('welcomePage');
+
+  const handleLogout = () => setPage('startPage');
+
+  const handleViewProducts = () => setPage('productPage');
+
+  const handleViewFavorites = () => setPage('favoritesPage');
+
+  const handleToggleFavorite = (product) => {
+    setFavorites((prevFavorites) => {
+      if (prevFavorites.some(fav => fav.id === product.id)) {
+        return prevFavorites.filter(fav => fav.id !== product.id);
+      } else {
+        return [...prevFavorites, product];
+      }
+    });
+  };
+
+  let content;
+  if (page === 'startPage') {
+    content = <StartPage onStart={handleStart} />;
+  } else if (page === 'signupPage') {
+    content = (
+      <Signup
+        setUsername={setUsername}
+        setPassword={setPassword}
+        setEmail={setEmail}
+        onSignup={handleSignup}
+      />
+    );
+  } else if (page === 'loginPage') {
+    content = (
+      <Login
+        setUsername={setUsername}
+        setPassword={setPassword}
+        onLogin={handleLogin}
+      />
+    );
+  } else if (page === 'welcomePage') {
+    content = (
+      <WelcomePage
+        username={username}
+        onLogout={handleLogout}
+        onViewProducts={handleViewProducts}
+        onViewFavorites={handleViewFavorites}
+      />
+    );
+  } else if (page === 'productPage') {
+    content = (
+      <ProductPage
+        username={username}
+        onLogout={handleLogout}
+        favorites={favorites}
+        onToggleFavorite={handleToggleFavorite}
+      />
+    );
+  } else if (page === 'favoritesPage') {
+    content = (
+      <FavoritesPage
+        username={username}
+        onLogout={handleLogout}
+        favorites={favorites}
+        onToggleFavorite={handleToggleFavorite}
+      />
+    );
+  }
+
+  return <View style={styles.container}>{content}</View>;
+};
+
+// Styles
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#f0f0f0',
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 20,
+  },
+  input: {
+    width: '80%',
+    height: 40,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    marginBottom: 20,
+    paddingHorizontal: 10,
+  },
+  welcomeText: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    marginBottom: 20,
+  },
+  usernameText: {
+    fontSize: 18,
+    marginBottom: 20,
+  },
+  buttonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    width: '80%',
+  },
+  card: {
+    backgroundColor: '#fff',
+    padding: 20,
+    marginVertical: 10,
+    width: '90%',
+    borderRadius: 10,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  image: {
+    width: 150,
+    height: 150,
+    marginBottom: 10,
+  },
+  cardTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 5,
+  },
+  cardDescription: {
+    fontSize: 16,
+    marginBottom: 5,
+    textAlign: 'center',
+  },
+  cardPrice: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 5,
+  },
+  cardRating: {
+    fontSize: 16,
+  },
+  scrollContainer: {
+    alignItems: 'center',
+  },
+  favoriteButton: {
+    marginTop: 10,
+    backgroundColor: '#FFD700',
+    padding: 10,
+    borderRadius: 5,
+  },
+  favoriteButtonText: {
+    fontSize: 16,
+    color: '#fff',
+  },
+  noFavoritesText: {
+    fontSize: 18,
+    marginTop: 20,
+  },
+});
+
+export default App;
